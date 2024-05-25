@@ -58,6 +58,17 @@ async def register(message: Message, state: FSMContext):
     await state.set_state(Register.name)
     await message.answer('Введите ваше имя')
 
+
 @router.message(Register.name)
 async def register_name(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
+    await state.set_state(Register.age)
+    await message.answer('Введите ваш возраст')
+
+
+@router.message(Register.age)
+async def register_age(message: Message, state: FSMContext):
+    await state.update_data(age=message.text)
+    data = await state.get_data()
+    await message.answer(f'Ваше имя: {data["name"]}\nВаш возраст: {data["age"]}')
+    await state.clear()
