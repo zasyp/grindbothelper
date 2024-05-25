@@ -14,4 +14,6 @@ notify = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Кастомные напоминания', callback_data= 'custom_notify')]])
 
 
-help_keyb = KeyboardButton
+help_keyb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Информация о боте', callback_data= 'bot_info')],
+    [InlineKeyboardButton(text='О нас', callback_data= 'faq')]])
