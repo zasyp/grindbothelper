@@ -5,7 +5,7 @@ main = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='Напоминания')],
     [KeyboardButton(text='Оповещения')],
     [KeyboardButton(text='Дневник продуктивности'), KeyboardButton(text='Просмотр записей дневника')],
-    [KeyboardButton(text='Прогресс по целям')],
+    [KeyboardButton(text='Трекер времени')],
 ], resize_keyboard=True, input_field_placeholder='Выберите пункт меню...')
 
 notify_keyb = InlineKeyboardMarkup(inline_keyboard=[
@@ -26,4 +26,8 @@ motivation_keyb = InlineKeyboardMarkup(inline_keyboard=[
 
 date_keyboard = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(text='Выбрать дату', callback_data='choose_date')]
+])
+
+stop_tracking = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='Завершить отслеживание', callback_data='stop_tracking')]
 ])

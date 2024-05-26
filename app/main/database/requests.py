@@ -1,11 +1,10 @@
 from sqlalchemy.future import select
-from datetime import date
-from .models import User, DiaryEntry
-from .db import async_session
+import datetime
+from .models import User, DiaryEntry, ActivityTracking
+from .db import async_session, AsyncSession
 
-
-async def add_diary_entry(user_tg_id: int, entry_date: date, content: str):
-    async with async_session as session:  # Уберите вызов функции async_session()
+async def add_diary_entry(user_tg_id: int, entry_date: datetime.date, content: str):
+    async with async_session as session:
         result = await session.execute(
             select(User).where(User.tg_id == user_tg_id)
         )
@@ -21,15 +20,16 @@ async def add_diary_entry(user_tg_id: int, entry_date: date, content: str):
         session.add(new_entry)
         await session.commit()
 
-async def get_diary_entries(user_tg_id: int, entry_date: date):
+async def get_diary_entries(user_tg_id: int, entry_date: datetime.date):
     async with async_session as session:
         result = await session.execute(
             select(DiaryEntry).join(User).where(User.tg_id == user_tg_id, DiaryEntry.date == entry_date)
         )
         entries = result.scalars().all()
 
-        # Отладочный вывод для проверки результатов запроса
-        print("Запрос:", result)
-        print("Найденные записи:", entries)
-
         return entries
+
+async def track_activity(user_id: int, activity_name: str, duration: float, session: AsyncSession):
+    async with session.begin():
+        activity = ActivityTracking(user_id=user_id, activity_name=activity_name, duration=duration, date=datetime.datetime.now())
+        session.add(activity)
