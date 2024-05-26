@@ -3,7 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from datetime import date, timedelta
+from datetime import date
 import app.main.stuff.keyboards as kb
 from app.main.database.requests import add_diary_entry, get_diary_entries
 
@@ -37,6 +37,7 @@ async def notify(message: Message):
 async def daily_notifications(callback: CallbackQuery):
     await callback.message.answer("Вы выбрали категорию ежедневных напоминаний")
     await callback.message.answer("Ваши ежедневные напоминания:")
+
 
 @router.message(Command("help"))
 async def notify(message: Message):
@@ -136,18 +137,6 @@ async def select_view_date(message: Message, state: FSMContext):
     await state.set_state(ViewDiaryState.date)
 
 
-@router.callback_query(ViewDiaryState.date, F.data == "today")
-async def view_today_entries(callback: CallbackQuery, state: FSMContext):
-    await view_diary_entries(callback.message, date.today())
-    await state.clear()
-
-
-@router.callback_query(ViewDiaryState.date, F.data == "yesterday")
-async def view_yesterday_entries(callback: CallbackQuery, state: FSMContext):
-    await view_diary_entries(callback.message, date.today() - timedelta(days=1))
-    await state.clear()
-
-
 @router.callback_query(ViewDiaryState.date, F.data == "choose_date")
 async def prompt_for_date(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer("Введите дату в формате ГГГГ-ММ-ДД:")
@@ -158,7 +147,7 @@ async def prompt_for_date(callback: CallbackQuery, state: FSMContext):
 async def process_date_input(message: Message, state: FSMContext):
     try:
         selected_date = date.fromisoformat(message.text)
-        await view_diary_entries(message, selected_date)
+        await view_diary_entries(message, selected_date)  # Заменить message на callback.message
     except ValueError:
         await message.answer(
             "Некорректный формат даты. Пожалуйста, введите дату в формате ГГГГ-ММ-ДД."
