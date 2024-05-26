@@ -29,7 +29,19 @@ async def get_diary_entries(user_tg_id: int, entry_date: datetime.date):
 
         return entries
 
+import datetime
+
 async def track_activity(user_id: int, activity_name: str, duration: float, session: AsyncSession):
     async with session.begin():
-        activity = ActivityTracking(user_id=user_id, activity_name=activity_name, duration=duration, date=datetime.datetime.now())
+        today = datetime.date.today()
+        activity = ActivityTracking(user_id=user_id, activity_name=activity_name, duration=duration, date=today)
         session.add(activity)
+
+async def get_activities(user_tg_id: int, entry_date: datetime.date):
+    async with async_session as session:
+        result = await session.execute(
+            select(ActivityTracking).join(User).where(User.tg_id == user_tg_id, ActivityTracking.date == entry_date)
+        )
+        activities = result.scalars().all()
+
+        return activities
