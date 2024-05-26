@@ -4,9 +4,8 @@ from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
 main = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='Напоминания')],
     [KeyboardButton(text='Оповещения')],
-    [KeyboardButton(text='Дневник продуктивности')],
+    [KeyboardButton(text='Дневник продуктивности'),(KeyboardButton(text='Просмотр записей дневника'))],
     [KeyboardButton(text='Прогресс по целям')],
-    [KeyboardButton(text='Просмотр записей дневника')]  # Новая кнопка
 ], resize_keyboard=True, input_field_placeholder='Выберите пункт меню...')
 
 notify_keyb = InlineKeyboardMarkup(inline_keyboard=[
