@@ -147,9 +147,10 @@ async def stop_tracking(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(F.text == "Просмотр ваших активностей")
-async def ask_for_date_to_view_activities(message: Message):
+async def ask_for_date_to_view_activities(message: Message, state: FSMContext):
     await message.answer("Введите дату для просмотра активностей в формате ГГГГ-ММ-ДД:")
-    await TrackActivityState.date.set()
+    await state.set_state(TrackActivityState.date)
+
 
 
 async def view_activities(message: Message, entry_date: date):
