@@ -145,19 +145,22 @@ async def stop_tracking(callback: CallbackQuery, state: FSMContext):
     )
     await state.clear()
 
+
 @router.message(F.text == "Просмотр ваших активностей")
 async def ask_for_date_to_view_activities(message: Message):
     await message.answer("Введите дату для просмотра активностей в формате ГГГГ-ММ-ДД:")
     await TrackActivityState.date.set()
+
 
 async def view_activities(message: Message, entry_date: date):
     user_tg_id = message.from_user.id
     activities = await get_activities(user_tg_id, entry_date)
     if activities:
         response = "\n".join([f"{activity.activity_name}: {activity.duration} часов" for activity in activities])
-        await message.answer(f"Ваши активности за {entry_date}:\n{response}")
+        await message.answer(f"Ваши активности за {entry_date}: {response}")
     else:
         await message.answer("Активностей за эту дату нет.")
+
 
 @router.message
 async def process_date_for_activities(message: Message):
@@ -166,8 +169,6 @@ async def process_date_for_activities(message: Message):
         await view_activities(message, entry_date)
     except ValueError:
         await message.answer("Некорректный формат даты. Пожалуйста, введите дату в формате ГГГГ-ММ-ДД.")
-
-
 
 
 @router.message(F.text == "Дневник продуктивности")
@@ -219,3 +220,4 @@ async def view_diary_entries(message: Message, entry_date: date):
         await message.answer(f"Ваши записи за {entry_date}:\n{response}")
     else:
         await message.answer("Записей за эту дату нет.")
+
