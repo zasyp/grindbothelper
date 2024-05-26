@@ -27,8 +27,9 @@ class ViewDiaryState(StatesGroup):
 
 class TrackActivityState(StatesGroup):
     activity_name = State()
-    date = State()  # Добавляем атрибут date
+    date = State()
     tracking = State()
+
 
 
 @router.message(CommandStart())
@@ -150,7 +151,6 @@ async def stop_tracking(callback: CallbackQuery, state: FSMContext):
 async def ask_for_date_to_view_activities(message: Message, state: FSMContext):
     await message.answer("Введите дату для просмотра активностей в формате ГГГГ-ММ-ДД:")
     await state.set_state(TrackActivityState.date)
-
 
 
 async def view_activities(message: Message, entry_date: date):
