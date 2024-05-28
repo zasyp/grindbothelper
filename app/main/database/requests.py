@@ -4,7 +4,6 @@ from .models import User, DiaryEntry, ActivityTracking
 from .db import async_session, AsyncSession
 import logging
 
-logging.basicConfig(level=logging.INFO)
 
 async def add_diary_entry(user_tg_id: int, entry_date: date, content: str):
     async with async_session as session:
@@ -32,13 +31,11 @@ async def get_diary_entries(user_tg_id: int, entry_date: date):
 
 
 async def track_activity(user_tg_id: int, activity_name: str, duration: float, session: AsyncSession):
-    logging.info(f"Tracking activity: {activity_name} for user: {user_tg_id} with duration: {duration}")
     async with session.begin():
         result = await session.execute(select(User).where(User.tg_id == user_tg_id))
         user = result.scalars().first()
 
         if not user:
-            logging.info(f"User with tg_id: {user_tg_id} not found. Creating new user.")
             user = User(tg_id=user_tg_id)
             session.add(user)
             await session.commit()
@@ -46,14 +43,11 @@ async def track_activity(user_tg_id: int, activity_name: str, duration: float, s
 
         activity = ActivityTracking(user_id=user.id, activity_name=activity_name, duration=duration, date=date.today())
         session.add(activity)
-        logging.info(f"Activity {activity_name} added to the database for user: {user_tg_id}")
 
 async def get_activities(user_tg_id: int, entry_date: date):
-    logging.info(f"Fetching activities for user: {user_tg_id} on date: {entry_date}")
     async with async_session as session:
         result = await session.execute(
             select(ActivityTracking).join(User).where(User.tg_id == user_tg_id, ActivityTracking.date == entry_date)
         )
         activities = result.scalars().all()
-        logging.info(f"Activities fetched: {activities}")
         return activities
