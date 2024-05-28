@@ -174,7 +174,7 @@ async def track_time(activity_name: str, message: Message, state: FSMContext):
     start_time = time.time()
     await state.update_data(start_time=start_time, activity_name=activity_name)
     await message.answer(
-        f"Отслеживание активности '{activity_name}' началось. Нажмите 'Завершить отслеживание', когда закончите.",
+        f"Отслеживание активности '{activity_name}' началось.\n Нажмите 'Завершить отслеживание', когда закончите.",
         reply_markup=kb.stop_tracking,
     )
 
@@ -192,7 +192,7 @@ async def stop_tracking(callback: CallbackQuery, state: FSMContext):
         await track_activity(user_tg_id, activity_name, duration, session)
 
     await callback.message.answer(
-        f"Отслеживание активности '{activity_name}' завершено. Продолжительность: {duration:.2f} секунд."
+        f"Отслеживание активности '{activity_name}' завершено.\n Продолжительность: {duration:.2f} секунд."
     )
     await state.clear()
 
@@ -209,14 +209,14 @@ async def process_date_for_activities(message: Message, state: FSMContext):
         entry_date = date.fromisoformat(message.text)
         await view_activities(message, entry_date)
     except ValueError:
-        await message.answer("Некорректный формат даты. Пожалуйста, введите дату в формате ГГГГ-ММ-ДД.")
+        await message.answer("Некорректный формат даты.\n Пожалуйста, введите дату в формате ГГГГ-ММ-ДД.")
 
 
 async def view_activities(message: Message, entry_date: date):
     user_tg_id = message.from_user.id
     activities = await get_activities(user_tg_id, entry_date)
     if activities:
-        response = "\n".join([f"{activity.activity_name}: {activity.duration} секунд" for activity in activities])
-        await message.answer(f"Ваши активности за {entry_date}: {response}")
+        response = "\n".join([f"{activity.activity_name}:\n {round(activity.duration / 3600,2)} часов" for activity in activities])
+        await message.answer(f"Ваши активности за {entry_date}:\n {response}")
     else:
         await message.answer("Активностей за эту дату нет.")
