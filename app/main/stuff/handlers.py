@@ -164,8 +164,7 @@ async def enter_activity_name(message: Message, state: FSMContext):
     activity_name = message.text
     await state.update_data(activity_name=activity_name)
     await message.answer(
-        f"Начинаю отслеживать активность '{activity_name}'. Нажмите 'Завершить отслеживание', когда закончите."
-    )
+        f"Начинаю отслеживать активность {activity_name}.")
     await state.set_state(TrackActivityState.tracking)
     await track_time(activity_name, message, state)
 
