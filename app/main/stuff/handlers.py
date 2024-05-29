@@ -1,18 +1,25 @@
 import time
+import pytest
+from datetime import datetime
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from datetime import date
+from aiogram.utils.markdown import text
 import app.main.stuff.keyboards as kb
+from aiogram.filters import StateFilter
 from app.main.database.requests import (
     add_diary_entry,
     get_diary_entries,
     track_activity,
     async_session,
-    get_activities
+    get_activities,
+    add_reminder,
+    get_reminders
 )
+
 
 router = Router()
 
@@ -29,6 +36,11 @@ class TrackActivityState(StatesGroup):
     activity_name = State()
     date = State()
     tracking = State()
+
+
+class ReminderHandler(StatesGroup):
+    reminder_time = State()
+    reminder_message = State()
 
 
 @router.message(CommandStart())
@@ -203,7 +215,7 @@ async def ask_for_date_to_view_activities(message: Message, state: FSMContext):
 
 
 @router.message(TrackActivityState.date)
-async def process_date_for_activities(message: Message, state: FSMContext):
+async def process_date_for_activities(message: Message):
     try:
         entry_date = date.fromisoformat(message.text)
         await view_activities(message, entry_date)
@@ -215,7 +227,47 @@ async def view_activities(message: Message, entry_date: date):
     user_tg_id = message.from_user.id
     activities = await get_activities(user_tg_id, entry_date)
     if activities:
-        response = "\n".join([f"{activity.activity_name}:\n {round(activity.duration / 3600,2)} часов" for activity in activities])
+        response = "\n".join([f"{activity.activity_name}:\n"
+                              f" {round(activity.duration / 3600, 2)} часов" for activity in activities])
         await message.answer(f"Ваши активности за {entry_date}:\n {response}")
     else:
         await message.answer("Активностей за эту дату нет.")
+
+
+@router.message(Command('set_reminder'))
+async def set_reminder(message, state):
+    await state.set_state(ReminderHandler.reminder_time)
+    await message.reply('Выберите время напоминания (HH:MM)')
+
+
+@router.message(StateFilter(ReminderHandler.reminder_time))
+async def set_reminder_time(message, state: FSMContext):
+    try:
+        reminder_time = datetime.strptime(message.text, '%H:%M').time()
+    except ValueError:
+        await message.reply('Неверный формат времени')
+        return
+
+    await state.update_data(reminder_time=reminder_time)
+    await state.set_state(ReminderHandler.reminder_message)
+    await message.reply('Введите текст напоминания')
+
+
+@router.message(StateFilter(ReminderHandler.reminder_message))
+async def set_reminder_message(message, state: FSMContext):
+    data = await state.get_data()
+    reminder_time = data.get('reminder_time')
+    reminder_message = message.text
+
+    await add_reminder(user_tg_id=message.from_user.id, message=reminder_message, reminder_time=reminder_time)
+    await message.reply('Напоминание успешно добавлено')
+
+
+@router.message(Command('reminders'))
+async def get_reminders(message):
+    reminders = await get_reminders(user_tg_id=message.from_user.id)
+    if not reminders:
+        await message.reply('Напоминаний нет')
+    else:
+        for reminder in reminders:
+            await message.reply(text(f'Напоминание: {reminder.message}'))

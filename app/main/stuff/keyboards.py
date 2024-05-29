@@ -1,6 +1,7 @@
 from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
                            InlineKeyboardMarkup, InlineKeyboardButton)
 
+# Основное меню (ReplyKeyboardMarkup)
 main = ReplyKeyboardMarkup(
     keyboard=[
         [
@@ -18,19 +19,19 @@ main = ReplyKeyboardMarkup(
             KeyboardButton(text='Просмотр ваших активностей')
         ]
     ],
-    resize_keyboard=True, input_field_placeholder='Выберите пункт меню...')
+    resize_keyboard=True, input_field_placeholder='Выберите пункт меню...'
+)
 
+# Кнопки для ежедневных напоминаний (InlineKeyboardMarkup)
 notify_keyb = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(text='Ежедневные напоминания', callback_data='daily_notify')
-        ],
-        [
-            InlineKeyboardButton(text='Кастомные напоминания', callback_data='custom_notify')
         ]
     ]
 )
 
+# Кнопки для информации о боте (InlineKeyboardMarkup)
 help_keyb = InlineKeyboardMarkup(
     inline_keyboard=[
         [
@@ -45,6 +46,7 @@ help_keyb = InlineKeyboardMarkup(
     ]
 )
 
+# Кнопки для мотивации (InlineKeyboardMarkup)
 motivation_keyb = InlineKeyboardMarkup(
     inline_keyboard=[
         [
@@ -56,6 +58,7 @@ motivation_keyb = InlineKeyboardMarkup(
     ]
 )
 
+# Кнопки для выбора даты (InlineKeyboardMarkup)
 date_keyboard = InlineKeyboardMarkup(
     inline_keyboard=[
         [
@@ -64,6 +67,7 @@ date_keyboard = InlineKeyboardMarkup(
     ]
 )
 
+# Кнопки для завершения отслеживания (InlineKeyboardMarkup)
 stop_tracking = InlineKeyboardMarkup(
     inline_keyboard=[
         [
