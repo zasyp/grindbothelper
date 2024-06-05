@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -17,6 +18,7 @@ class User(Base):
     def __repr__(self):
         return f"<User(id={self.id}, tg_id={self.tg_id}, username={self.username})>"
 
+
 class DiaryEntry(Base):
     __tablename__ = 'diary_entries'
 
@@ -29,6 +31,7 @@ class DiaryEntry(Base):
 
     def __repr__(self):
         return f"<DiaryEntry(id={self.id}, user_id={self.user_id}, date={self.date}, content={self.content})>"
+
 
 class ActivityTracking(Base):
     __tablename__ = 'activity_tracking'
@@ -44,18 +47,3 @@ class ActivityTracking(Base):
     def __repr__(self):
         return (f"<ActivityTracking(id={self.id}, user_id={self.user_id},"
                 f" activity_name={self.activity_name}, duration={self.duration}, date={self.date})>")
-
-
-class Reminder(Base):
-    __tablename__ = 'reminders'
-
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    message = Column(String, nullable=False)
-    reminder_time = Column(String, nullable=False)
-
-    user = relationship('User', back_populates='reminders')
-
-    def __repr__(self):
-        return (f"<Reminder(id={self.id}, user_id={self.user_id},"
-                f" message={self.message}, reminder_time={self.reminder_time})>")

@@ -1,25 +1,22 @@
 import time
-import pytest
-from datetime import datetime
+from datetime import date
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from datetime import date
-from aiogram.utils.markdown import text
-import app.main.stuff.keyboards as kb
-from aiogram.filters import StateFilter
 from app.main.database.requests import (
     add_diary_entry,
     get_diary_entries,
     track_activity,
     async_session,
-    get_activities,
-    add_reminder,
-    get_reminders
+    get_activities
 )
+import asyncio
+from datetime import datetime, timedelta
+from aiogram import Bot
 
+import app.main.stuff.keyboards as kb
 
 router = Router()
 
@@ -37,26 +34,9 @@ class TrackActivityState(StatesGroup):
     date = State()
     tracking = State()
 
-
-class ReminderHandler(StatesGroup):
-    reminder_time = State()
-    reminder_message = State()
-
-
 @router.message(CommandStart())
 async def cmd_start(message: Message):
     await message.answer("Привет!", reply_markup=kb.main)
-
-
-@router.message(F.text == "Напоминания")
-async def notify(message: Message):
-    await message.answer("Выберите тип напоминания", reply_markup=kb.notify_keyb)
-
-
-@router.callback_query(F.data == "daily_notify")
-async def daily_notifications(callback: CallbackQuery):
-    await callback.message.answer("Вы выбрали категорию ежедневных напоминаний")
-    await callback.message.answer("Ваши ежедневные напоминания:")
 
 
 @router.message(Command("help"))
@@ -93,17 +73,6 @@ async def functionality(callback: CallbackQuery):
     )
 
 
-@router.callback_query(F.data == "custom_notify")
-async def custom_notifications(callback: CallbackQuery):
-    await callback.message.answer("Вы выбрали категорию кастомных напоминаний")
-    await callback.message.answer("Введите текст вашего напоминания:")
-
-
-@router.message(F.text == "Оповещения")
-async def notify(message: Message):
-    await message.answer("Выберите действие", reply_markup=kb.motivation_keyb)
-
-
 @router.callback_query(F.data == "on_message")
 async def on_message(callback: CallbackQuery):
     await callback.message.answer("Вы включили ежедневную рассылку")
@@ -134,6 +103,7 @@ async def add_diary(message: Message, state: FSMContext):
 @router.message(F.text == "Просмотр записей дневника")
 async def select_view_date(message: Message, state: FSMContext):
     await message.answer("Выберите дату:", reply_markup=kb.date_keyboard)
+
     await state.set_state(ViewDiaryState.date)
 
 
@@ -220,6 +190,7 @@ async def process_date_for_activities(message: Message):
         entry_date = date.fromisoformat(message.text)
         await view_activities(message, entry_date)
     except ValueError:
+
         await message.answer("Некорректный формат даты.\n Пожалуйста, введите дату в формате ГГГГ-ММ-ДД.")
 
 
@@ -230,44 +201,6 @@ async def view_activities(message: Message, entry_date: date):
         response = "\n".join([f"{activity.activity_name}:\n"
                               f" {round(activity.duration / 3600, 2)} часов" for activity in activities])
         await message.answer(f"Ваши активности за {entry_date}:\n {response}")
+
     else:
         await message.answer("Активностей за эту дату нет.")
-
-
-@router.message(Command('set_reminder'))
-async def set_reminder(message, state):
-    await state.set_state(ReminderHandler.reminder_time)
-    await message.reply('Выберите время напоминания (HH:MM)')
-
-
-@router.message(StateFilter(ReminderHandler.reminder_time))
-async def set_reminder_time(message, state: FSMContext):
-    try:
-        reminder_time = datetime.strptime(message.text, '%H:%M').time()
-    except ValueError:
-        await message.reply('Неверный формат времени')
-        return
-
-    await state.update_data(reminder_time=reminder_time)
-    await state.set_state(ReminderHandler.reminder_message)
-    await message.reply('Введите текст напоминания')
-
-
-@router.message(StateFilter(ReminderHandler.reminder_message))
-async def set_reminder_message(message, state: FSMContext):
-    data = await state.get_data()
-    reminder_time = data.get('reminder_time')
-    reminder_message = message.text
-
-    await add_reminder(user_tg_id=message.from_user.id, message=reminder_message, reminder_time=reminder_time)
-    await message.reply('Напоминание успешно добавлено')
-
-
-@router.message(Command('reminders'))
-async def get_reminders(message):
-    reminders = await get_reminders(user_tg_id=message.from_user.id)
-    if not reminders:
-        await message.reply('Напоминаний нет')
-    else:
-        for reminder in reminders:
-            await message.reply(text(f'Напоминание: {reminder.message}'))

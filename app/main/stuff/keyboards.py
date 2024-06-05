@@ -4,12 +4,7 @@ from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
 # Основное меню (ReplyKeyboardMarkup)
 main = ReplyKeyboardMarkup(
     keyboard=[
-        [
-            KeyboardButton(text='Напоминания')
-        ],
-        [
-            KeyboardButton(text='Оповещения')
-        ],
+
         [
             KeyboardButton(text='Дневник продуктивности'),
             KeyboardButton(text='Просмотр записей дневника')
@@ -22,14 +17,8 @@ main = ReplyKeyboardMarkup(
     resize_keyboard=True, input_field_placeholder='Выберите пункт меню...'
 )
 
-# Кнопки для ежедневных напоминаний (InlineKeyboardMarkup)
-notify_keyb = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(text='Ежедневные напоминания', callback_data='daily_notify')
-        ]
-    ]
-)
+
+
 
 # Кнопки для информации о боте (InlineKeyboardMarkup)
 help_keyb = InlineKeyboardMarkup(
@@ -46,17 +35,7 @@ help_keyb = InlineKeyboardMarkup(
     ]
 )
 
-# Кнопки для мотивации (InlineKeyboardMarkup)
-motivation_keyb = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(text='Включить рассылку', callback_data='on_message')
-        ],
-        [
-            InlineKeyboardButton(text='Выключить рассылку', callback_data='off_message')
-        ]
-    ]
-)
+
 
 # Кнопки для выбора даты (InlineKeyboardMarkup)
 date_keyboard = InlineKeyboardMarkup(
